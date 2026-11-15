@@ -898,6 +898,31 @@ input[type="range"] { accent-color: var(--primary); width: 180px; max-width: 100
 [data-motif="bn"] .bb-art .ac { color: #f42a41; }
 [data-motif="fr"] .bb-art .ac { color: #ef4135; } [data-motif="fr"] .bb-art .ac2 { color: #8fb0ff; }
 
+/* ---------- meanings: English and Bangla side by side ----------
+   Every gloss in the data is written "english · বাংলা". The engine splits
+   it into two spans, so the reader can study with both languages, or hide
+   one and use the other as a check. Nothing is lost either way: hidden
+   text stays in the page for search and for screen readers. */
+.gl-en, .gl-bn { }
+.gl-bn { font-feature-settings: "kern" 1; }
+html[data-gloss="en"] .gl-bn,
+html[data-gloss="en"] .gl-sep,
+html[data-gloss="bn"] .gl-en,
+html[data-gloss="bn"] .gl-sep { display: none; }
+
+/* the quick switch that rides along with a lesson */
+.glbar { display: inline-flex; align-items: center; gap: 2px; padding: 2px;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
+  box-shadow: var(--shadow); }
+.glbar button { appearance: none; border: 0; cursor: pointer; font: inherit;
+  font-size: .78rem; line-height: 1; padding: 6px 11px; border-radius: 999px;
+  background: transparent; color: var(--ink-2); transition: background .15s, color .15s; }
+.glbar button:hover { background: var(--surface-2); color: var(--ink); }
+.glbar button[aria-pressed="true"] { background: var(--primary); color: var(--primary-ink); }
+.glbar button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+@media print { .glbar { display: none; } }
+.lesson-gloss { margin: 6px 0 10px; }
+
 /* ---------- course theme: Learn French ---------- */
 :root { --paper: #f4f5f9; --surface-2: #e8ebf4; --ink: #141c33; --ink-2: #4b5470; --ink-3: #7d859e; --line: #d6dbe8; --primary: #2648a8; --primary-print: #2648a8; --c-teal: #2648a8; --cover: #15244f;
   --f-tg: "Fraunces", Georgia, serif; --f-en: "Figtree", "Segoe UI", system-ui, sans-serif; --tg-k: .86; --tg-lh: 1.3;

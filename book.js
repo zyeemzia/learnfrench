@@ -2,7 +2,7 @@
    Copyright © ZyeemZia */
 (function () {
   'use strict';
-  const { C, esc, md, plain, hl, fold, prepare, seeded, isHan } = window.LX;
+  const { C, esc, md, gl, plain, hl, fold, prepare, seeded, isHan } = window.LX;
   const MOTIF = String(C.htmlLang || 'fr').split('-')[0];
   const ART = (window.LXART || {})[MOTIF] || { scene: '', icon: '', corner: '' };
   document.documentElement.setAttribute('data-motif', MOTIF);
@@ -42,7 +42,7 @@
 
   function cover() {
     return `<section class="page cover"><div class="khatam"></div><div class="cover-in">
-      <div class="cover-top">${D.units.length} Units · ${D.lessons.length} Lessons · English to ${esc(C.lang || "")}</div>
+      <div class="cover-top">${D.units.length} Units · ${D.lessons.length} Lessons · ${esc(C.coverFrom || "English")} to ${esc(C.lang || "")}</div>
       <div class="cover-cal" lang="${HL}">${esc(C.native || '')}</div>
       <h1>${esc(C.title || '')}<span class="sub">Book &amp; Workbook</span></h1>
       <p class="cover-lead">${esc(C.tagline || '')}</p>
@@ -92,7 +92,7 @@
     if (!D.alphabet.length) return '';
     return `<section class="flow"><div class="eyebrow">At a glance</div><h1 class="h-page">${esc(C.alphabetTitle || 'Letters')}</h1>
       ${D.groups.map(g => { const items = D.alphabet.filter(a => a.group === g.id); return items.length ? `<h3 class="blk-title">${esc(g.label)}</h3>${g.note ? `<p class="wk-help">${md(g.note)}</p>` : ''}
-        <div class="alpha">${items.map(a => `<div><div class="a ${sz(a.ch)}" lang="${HL}">${esc(a.ch)}</div><b>${esc(a.name)}</b><small>/${esc(a.tr)}/</small><div class="f">${tg(a.example.t, 'tg-in')} ${md(a.example.mean)}</div></div>`).join('')}</div>` : ''; }).join('')}
+        <div class="alpha">${items.map(a => `<div><div class="a ${sz(a.ch)}" lang="${HL}">${esc(a.ch)}</div><b>${esc(a.name)}</b><small>/${gl(a.tr)}/</small><div class="f">${tg(a.example.t, 'tg-in')} ${md(a.example.mean)}</div></div>`).join('')}</div>` : ''; }).join('')}
       </section>`;
   }
 
@@ -102,26 +102,26 @@
     switch (b.type) {
       case 'text': return wrap(`<p>${md(b.text)}</p>`);
       case 'tip': return wrap(`<aside class="tip tip-${esc(b.kind)}"><span class="tip-label">${{ tip: 'Tip', warn: 'Watch out', memory: 'Memory trick', fun: 'Did you know?', culture: 'Culture note' }[b.kind] || ''}</span>${md(b.text)}</aside>`);
-      case 'letters': return wrap(`<div class="lgrid">${b.items.map(id => D.letterById[id]).filter(Boolean).map(a => `<div class="lcard"><span class="a ${sz(a.ch)}" lang="${HL}">${esc(a.ch)}</span><b>${esc(a.name)}</b><small>/${esc(a.tr)}/</small><small>${tg(a.example.t, 'tg-in')} ${md(a.example.mean)}</small></div>`).join('')}</div>`);
-      case 'examples': return wrap(`<div class="exg">${b.items.map(x => `<div class="ex"><span class="tg" lang="${HL}">${hl(x.t, x.hl)}</span><span class="t">${esc(x.tr)}</span>${x.mean ? `<span class="m">${md(x.mean)}</span>` : ''}${x.note ? `<span class="m">${md(x.note)}</span>` : ''}</div>`).join('')}</div>`);
+      case 'letters': return wrap(`<div class="lgrid">${b.items.map(id => D.letterById[id]).filter(Boolean).map(a => `<div class="lcard"><span class="a ${sz(a.ch)}" lang="${HL}">${esc(a.ch)}</span><b>${esc(a.name)}</b><small>/${gl(a.tr)}/</small><small>${tg(a.example.t, 'tg-in')} ${md(a.example.mean)}</small></div>`).join('')}</div>`);
+      case 'examples': return wrap(`<div class="exg">${b.items.map(x => `<div class="ex"><span class="tg" lang="${HL}">${hl(x.t, x.hl)}</span><span class="t">${gl(x.tr)}</span>${x.mean ? `<span class="m">${md(x.mean)}</span>` : ''}${x.note ? `<span class="m">${md(x.note)}</span>` : ''}</div>`).join('')}</div>`);
       case 'table': return wrap(`<table>${b.head ? `<thead><tr>${b.head.map(h => `<th>${md(h)}</th>`).join('')}</tr></thead>` : ''}<tbody>${b.rows.map(r => `<tr>${r.map(c => `<td>${md(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`);
       case 'build': return wrap(`<table class="build"><thead><tr><th></th>${b.marks.map((m, j) => `<th style="text-align:center">${b.labels ? md(b.labels[j]) : ''} ${tg(m, 'tg-in')}</th>`).join('')}</tr></thead><tbody>${b.base.map(base => `<tr><td class="base" lang="${HL}">${esc(base)}</td>${b.marks.map(m => `<td>${tg(base + m)}</td>`).join('')}</tr>`).join('')}</tbody></table>`);
       case 'compare': return wrap(`<div class="cmp">${b.items.map(x => `<div>${tg(x.t)}<b>${md(x.label)}</b><p>${md(x.desc)}</p></div>`).join('')}</div>`);
       case 'rule': return wrap(`<section class="rule" style="--rc:var(--tj-${esc(b.color)})"><div class="rule-h"><h4>${md(b.name)}</h4></div>
         <p>${md(b.desc)}</p>${b.how ? `<div class="how"><b>How to say it:</b> ${md(b.how)}</div>` : ''}
-        ${b.examples && b.examples.length ? `<div class="exs">${b.examples.map(x => `<span lang="${HL}">${hl(x.t, x.hl, 'tj-' + b.color)}<small>${esc(x.tr)}</small></span>`).join('')}</div>` : ''}</section>`);
+        ${b.examples && b.examples.length ? `<div class="exs">${b.examples.map(x => `<span lang="${HL}">${hl(x.t, x.hl, 'tj-' + b.color)}<small>${gl(x.tr)}</small></span>`).join('')}</div>` : ''}</section>`);
       case 'practice': return wrap(`<div class="practice"><p style="font-size:9.5pt;margin-bottom:1mm">${md(b.text)}</p>${b.lines.map(l => `<div class="ln" lang="${HL}">${esc(l)}</div>`).join('')}</div>`);
-      case 'vocab': return wrap(`<table class="vt"><thead><tr><th>${esc(L1)}</th><th>Say it</th><th>Meaning</th></tr></thead><tbody>${b.items.map(w => `<tr><td class="tgc" lang="${HL}">${esc(w.t)}</td><td>${esc(w.tr)}</td><td>${md(w.mean)}${w.root ? ` <span class="root" lang="${HL}">${esc(w.root)}</span>` : ''}${w.example ? `<div class="exr">${tg(w.example.t, 'tg-in')}${w.example.tr ? ` (${esc(w.example.tr)})` : ''} — ${md(w.example.mean)}</div>` : ''}</td></tr>`).join('')}</tbody></table>`);
+      case 'vocab': return wrap(`<table class="vt"><thead><tr><th>${esc(L1)}</th><th>Say it</th><th>Meaning</th></tr></thead><tbody>${b.items.map(w => `<tr><td class="tgc" lang="${HL}">${esc(w.t)}</td><td>${gl(w.tr)}</td><td>${md(w.mean)}${w.root ? ` <span class="root" lang="${HL}">${esc(w.root)}</span>` : ''}${w.example ? `<div class="exr">${tg(w.example.t, 'tg-in')}${w.example.tr ? ` (${gl(w.example.tr)})` : ''} — ${md(w.example.mean)}</div>` : ''}</td></tr>`).join('')}</tbody></table>`);
       case 'sentence': return wrap(`<div class="sent"><div class="txt" lang="${HL}">${esc(b.t)}</div>
           ${b.words && b.words.length ? `<div class="wbw">${b.words.map(w => `<div>${tg(w.t)}<small>${md(w.mean)}</small></div>`).join('')}</div>` : ''}
-          <div class="tr">${esc(b.tr)}</div><p style="margin-top:1mm">${md(b.mean)}</p>${b.note ? `<p class="note">${md(b.note)}</p>` : ''}</div>`);
-      case 'dialogue': return wrap(`<div class="dlg">${b.lines.map(x => `<div class="dl"><b>${esc(x.who)}</b><div><span class="tg" lang="${HL}">${esc(x.t)}</span><small class="dtr">${esc(x.tr)}</small><small>${md(x.mean)}</small></div></div>`).join('')}</div>`);
+          <div class="tr">${gl(b.tr)}</div><p style="margin-top:1mm">${md(b.mean)}</p>${b.note ? `<p class="note">${md(b.note)}</p>` : ''}</div>`);
+      case 'dialogue': return wrap(`<div class="dlg">${b.lines.map(x => `<div class="dl"><b>${esc(x.who)}</b><div><span class="tg" lang="${HL}">${esc(x.t)}</span><small class="dtr">${gl(x.tr)}</small><small>${md(x.mean)}</small></div></div>`).join('')}</div>`);
       case 'steps': return wrap(`<ol class="steps">${b.items.map(x => `<li><div><b>${md(x.title)}</b>
-          ${x.t ? tg(x.t) : ''}${x.tr ? `<div class="tr">${esc(x.tr)}</div>` : ''}${x.mean ? `<div>${md(x.mean)}</div>` : ''}${x.desc ? `<div class="d">${md(x.desc)}</div>` : ''}</div></li>`).join('')}</ol>`);
+          ${x.t ? tg(x.t) : ''}${x.tr ? `<div class="tr">${gl(x.tr)}</div>` : ''}${x.mean ? `<div>${md(x.mean)}</div>` : ''}${x.desc ? `<div class="d">${md(x.desc)}</div>` : ''}</div></li>`).join('')}</ol>`);
       case 'howto': {
         const a = D.alphabet.find(x => x.ch.split(' ').includes(b.char) || x.ch === b.char);
         const strip = C.hanzi && isHan(b.char) ? strokeStrip(b.char) : '';
-        return wrap(`<div class="wk-howto"><div class="wk-hm"><span class="wk-big" lang="${HL}">${esc(b.char)}</span>${b.name ? `<b>${md(b.name)}</b>` : a ? `<b>${esc(a.name)}</b><small>/${esc(a.tr)}/</small>` : ''}</div>
+        return wrap(`<div class="wk-howto"><div class="wk-hm"><span class="wk-big" lang="${HL}">${esc(b.char)}</span>${b.name ? `<b>${md(b.name)}</b>` : a ? `<b>${esc(a.name)}</b><small>/${gl(a.tr)}/</small>` : ''}</div>
           <div><ol class="wk-steps">${b.steps.map(st => `<li>${md(st)}</li>`).join('')}</ol>${b.tip ? `<p class="wk-tip">★ ${md(b.tip)}</p>` : ''}</div></div>
           ${strip}${copyRow(b.char, 'letter', 6)}`);
       }

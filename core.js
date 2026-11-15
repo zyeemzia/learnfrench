@@ -10,7 +10,7 @@ window.LC = window.LC || { course: null, alphabet: null, units: [] };
   const tgSpan = t => `<span class="tg-in" lang="${esc(C.htmlLang || '')}">${t}</span>`;
 
   /* inline markup: **bold**, {{target}}; target-script runs are wrapped automatically for Bangla/Chinese */
-  function md(s) {
+  function mdRaw(s) {
     const parts = String(s == null ? '' : s).split(/\{\{([\s\S]+?)\}\}/);
     return parts.map((p, i) => {
       if (i % 2) return tgSpan(esc(p));
@@ -19,6 +19,37 @@ window.LC = window.LC || { course: null, alphabet: null, units: [] };
       return h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
     }).join('');
   }
+
+  /* A gloss written "english · বাংলা" is one string in the data but two
+     languages on the page.  Splitting it here, once, lets the reader hide
+     either side without any call site knowing about it.  The split is made
+     only where the left side carries no Bangla and the right side does, so
+     a middle dot inside ordinary text is left alone. */
+  const BNRE = /[ঀ-৿]/;
+  /* Only where Bangla is the help, never where it is the subject: on
+     learnbangla the Bangla IS the target language and must never be
+     hidden, so the split is off there. */
+  const GLOSSABLE = C.htmlLang !== 'bn' && !C.cjk;
+  function twoSided(s) {
+    if (!GLOSSABLE) return null;
+    s = String(s == null ? '' : s);
+    let i = s.indexOf(' · ');
+    while (i >= 0) {
+      const a = s.slice(0, i), b = s.slice(i + 3);
+      if (!BNRE.test(a) && BNRE.test(b)) return [a, b];
+      i = s.indexOf(' · ', i + 1);
+    }
+    return null;
+  }
+  function gloss(s, render) {
+    const p = twoSided(s);
+    if (!p) return render(s);
+    return `<span class="gl-en">${render(p[0])}</span>`
+      + `<span class="gl-sep"> · </span>`
+      + `<span class="gl-bn">${render(p[1])}</span>`;
+  }
+  const md = s => gloss(s, mdRaw);   /* meanings, notes, explanations */
+  const gl = s => gloss(s, esc);     /* pronunciation lines and other plain strings */
   const plain = s => String(s == null ? '' : s).replace(/\{\{|\}\}|\*\*/g, '');
   function hl(t, h, cls) {
     if (!h || String(t).indexOf(h) < 0) return esc(t);
@@ -47,5 +78,5 @@ window.LC = window.LC || { course: null, alphabet: null, units: [] };
   const joiner = C.cjk ? '' : ' ';
   const isHan = ch => /^[㐀-鿿豈-﫿]$/.test(ch);
 
-  window.LX = { C, esc, md, plain, hl, fold, isTarget, prepare, seeded, joiner, isHan };
+  window.LX = { C, esc, md, gl, plain, hl, fold, isTarget, prepare, seeded, joiner, isHan };
 })();

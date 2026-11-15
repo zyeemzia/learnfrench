@@ -2,7 +2,7 @@
    Copyright © ZyeemZia */
 (function () {
   'use strict';
-  const { C, esc, md, plain, hl, fold, prepare, joiner, isHan } = window.LX;
+  const { C, esc, md, gl, plain, hl, fold, prepare, joiner, isHan } = window.LX;
   const MOTIF = String(C.htmlLang || 'fr').split('-')[0];
   const ART = (window.LXART || {})[MOTIF] || { scene: '', icon: '', corner: '' };
   document.documentElement.setAttribute('data-motif', MOTIF);
@@ -16,7 +16,7 @@
 
   /* ---------------- state ---------------- */
   const KEY = (C.slug || 'course') + '.v1';
-  const defaults = () => ({ voice: 'f', theme: 'auto', tgScale: 1, rate: 0.85, done: {}, quiz: {}, xp: 0, streak: { last: null, count: 0 }, srs: {}, best: {}, fcDir: 'tg', day: {}, checks: {}, memo: {}, certName: '' });
+  const defaults = () => ({ voice: 'f', theme: 'auto', gloss: 'both', tgScale: 1, rate: 0.85, done: {}, quiz: {}, xp: 0, streak: { last: null, count: 0 }, srs: {}, best: {}, fcDir: 'tg', day: {}, checks: {}, memo: {}, certName: '' });
   let S = defaults();
   try { S = Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* storage blocked */ }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } };
@@ -236,9 +236,19 @@
   /* ---------------- chrome ---------------- */
   const NAV = [['home', 'home', '#home'], ['learn', 'learn', '#learn'], ['write', 'pen', '#unit/' + WRITE_UNIT], ['alphabet', 'alphabet', '#alphabet'], ['games', 'games', '#games'], ['more', 'grid', '#tools']];
   const TABS = ['home', 'learn', 'write', 'games', 'more'];
+  /* Shown on every lesson so a learner can lean on Bangla at first and
+     switch it off as the French starts to stick. */
+  function glossBar() {
+    const cur = S.gloss || 'both';
+    const opts = [['both', 'Both'], ['en', 'English'], ['bn', 'বাংলা']];
+    return `<div class="glbar" role="group" aria-label="Show meanings in">`
+      + opts.map(([k, l]) => `<button type="button" data-gloss-set="${k}" aria-pressed="${cur === k}">${l}</button>`).join('')
+      + `</div>`;
+  }
   function applyTheme() {
     const r = document.documentElement;
     if (S.theme === 'auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', S.theme);
+    r.setAttribute('data-gloss', S.gloss || 'both');
     r.style.setProperty('--tg-scale', S.tgScale);
   }
   function isDark() { return S.theme === 'dark' || (S.theme === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches); }
@@ -292,7 +302,7 @@
         <div class="pattern"></div>
         <div class="eyebrow">${u('wotd')}</div>
         <div class="wotd-tg ${glen(w.t) > 10 ? 'long' : ''}" lang="${HL}">${esc(w.t)}</div>
-        <div class="wotd-tr">${esc(w.tr)}</div>
+        <div class="wotd-tr">${gl(w.tr)}</div>
         <div class="wotd-mean">${md(w.mean)}</div>
         ${playBtn(w.t)}
         <div class="wotd-art">${ART.scene}</div>
@@ -389,6 +399,7 @@
       <div class="crumbs"><a href="#learn">${u('learn')}</a> / <a href="#unit/${un.id}">${md(un.title)}</a> / <span>${u('lesson')} ${l.index + 1}</span></div>
       <header class="lesson-head"><div class="pattern"></div><div class="head-corner">${ART.corner}</div>${badge(un, '', l.icon)}
         <div><div class="u-num">${u('unit')} ${un.order} · ${u('lesson')} ${l.index + 1}/${un.lessons.length} · ${l.minutes} ${u('min')}</div>
+        <div class="lesson-gloss">${glossBar()}</div>
         <h1>${md(l.title)}</h1><p>${md(l.subtitle)}</p>
         ${l.goals && l.goals.length ? `<ul class="goals" aria-label="${u('goals')}">${l.goals.map(g => `<li><span>${md(g)}</span></li>`).join('')}</ul>` : ''}</div>
       </header>
@@ -413,7 +424,7 @@
       case 'examples': return `<div>${T}<div class="ex-grid">${b.items.map(x => `
         <button class="ex" type="button" data-say="${esc(x.t)}">
           <span class="tg" lang="${HL}">${hl(x.t, x.hl)}</span>
-          <span class="ex-tr">${esc(x.tr)}</span>
+          <span class="ex-tr">${gl(x.tr)}</span>
           ${x.mean ? `<span class="ex-mean">${md(x.mean)}</span>` : ''}
           ${x.note ? `<span class="ex-note">${md(x.note)}</span>` : ''}
         </button>`).join('')}</div></div>`;
@@ -429,7 +440,7 @@
         <div class="rule-head"><span class="rule-swatch" style="background:var(--tj-${esc(b.color)})"></span><h4 class="tj-${esc(b.color)}">${md(b.name)}</h4></div>
         <div class="rule-body"><div>${md(b.desc)}</div>
           ${b.how ? `<div class="rule-how"><b>How to say it</b>${md(b.how)}</div>` : ''}
-          ${b.examples && b.examples.length ? `<div class="rule-ex">${b.examples.map(x => `<button type="button" data-say="${esc(x.t)}"><span class="tg" lang="${HL}">${hl(x.t, x.hl, 'tj-' + b.color)}</span><small>${esc(x.tr)}</small></button>`).join('')}</div>` : ''}
+          ${b.examples && b.examples.length ? `<div class="rule-ex">${b.examples.map(x => `<button type="button" data-say="${esc(x.t)}"><span class="tg" lang="${HL}">${hl(x.t, x.hl, 'tj-' + b.color)}</span><small>${gl(x.tr)}</small></button>`).join('')}</div>` : ''}
         </div></section>`;
       case 'practice': return `<section class="practice">${T}
         <div class="practice-top"><div>${md(b.text)}</div></div>
@@ -438,10 +449,10 @@
       case 'vocab': return `<div>${T}<div class="vocab">${b.items.map(w => `
         <div class="vrow">
           <span class="tg" lang="${HL}" data-say="${esc(w.t)}">${esc(w.t)}</span>
-          <span class="v-tr">${esc(w.tr)}</span>
+          <span class="v-tr">${gl(w.tr)}</span>
           <span class="v-mean">${md(w.mean)} ${w.root ? `<span class="root" title="${esc(u('roots'))}">${esc(w.root)}</span>` : ''}</span>
           ${playBtn(w.t)}
-          ${w.example ? `<div class="v-ex">${tg(w.example.t, 'tg-in')} ${w.example.tr ? `<span class="muted">(${esc(w.example.tr)})</span>` : ''} — ${md(w.example.mean)}</div>` : ''}
+          ${w.example ? `<div class="v-ex">${tg(w.example.t, 'tg-in')} ${w.example.tr ? `<span class="muted">(${gl(w.example.tr)})</span>` : ''} — ${md(w.example.mean)}</div>` : ''}
         </div>`).join('')}</div></div>`;
       case 'sentence': {
         const key = lesson.id + ':' + i;
@@ -451,7 +462,7 @@
           <div class="memo-bar" hidden><span class="memo-level"></span><span class="memo-actions"><button class="btn btn-sm" type="button" data-memorep="${esc(b.t)}">${icon('play')} ×3</button><button class="btn btn-sm" type="button" data-memodone="${esc(key)}">${icon('check')} I know it</button></span></div>
           <div class="sent-tg" lang="${HL}">${(b.words || []).map((w, j) => `<span class="w" data-wi="${j}" data-say="${esc(w.t)}">${esc(w.t)}</span>`).join(C.cjk ? '' : ' ')}</div>
           <div class="wbw" hidden>${(b.words || []).map(w => `<div class="wbw-w" data-say="${esc(w.t)}">${tg(w.t)}<small>${md(w.mean)}</small></div>`).join('')}</div>
-          <div class="sent-tr">${esc(b.tr)}</div>
+          <div class="sent-tr">${gl(b.tr)}</div>
           <div class="sent-mean">${md(b.mean)}</div>
           ${b.note ? `<div class="sent-note">${md(b.note)}</div>` : ''}
         </section>`;
@@ -460,13 +471,13 @@
         <div class="dl-top"><span class="sent-label">${icon('chat')} Conversation</span><span class="sent-btns"><button class="btn btn-sm" type="button" data-roleplay>Role-play</button><button class="btn btn-sm btn-primary" type="button" data-playall>${icon('play')} Play all</button></span></div>
         ${b.lines.map((x, j) => { const side = j % 2 ? 'b' : 'a'; return `<div class="dl-line ${side}" data-idx="${j}" data-t="${esc(x.t)}">
           <span class="dl-who">${esc(x.who)}</span>
-          <div class="dl-bubble"><div class="tg" lang="${HL}" data-alt="${j % 2}" data-say="${esc(x.t)}">${esc(x.t)}</div><div class="dl-tr">${esc(x.tr)}</div><div class="dl-mean">${md(x.mean)}</div></div>
+          <div class="dl-bubble"><div class="tg" lang="${HL}" data-alt="${j % 2}" data-say="${esc(x.t)}">${esc(x.t)}</div><div class="dl-tr">${gl(x.tr)}</div><div class="dl-mean">${md(x.mean)}</div></div>
           ${playBtn(x.t).replace('data-say=', `data-alt="${j % 2}" data-say=`)}</div>`; }).join('')}
       </section>`;
       case 'steps': return `<div>${T}<ol class="steps">${b.items.map(x => `<li><div class="st-body">
           <b>${md(x.title)}</b>
           ${x.t ? `<div class="tg" lang="${HL}" data-say="${esc(x.t)}">${esc(x.t)}</div>` : ''}
-          ${x.tr ? `<div class="st-tr">${esc(x.tr)}</div>` : ''}
+          ${x.tr ? `<div class="st-tr">${gl(x.tr)}</div>` : ''}
           ${x.mean ? `<div>${md(x.mean)}</div>` : ''}
           ${x.desc ? `<div class="st-desc">${md(x.desc)}</div>` : ''}
         </div></li>`).join('')}</ol></div>`;
@@ -496,7 +507,7 @@
   function letterTile(a) {
     const n = D.alphabet.indexOf(a) + 1;
     return `<button class="ltile" type="button" data-letter="${esc(a.id)}" aria-label="${esc(a.name)}">
-      <span class="l-num">${n}</span><span class="l-tg" lang="${HL}">${esc(a.ch)}</span><span class="l-name">${esc(a.name)}</span><span class="l-tr">${esc(a.tr)}</span></button>`;
+      <span class="l-num">${n}</span><span class="l-tg" lang="${HL}">${esc(a.ch)}</span><span class="l-name">${esc(a.name)}</span><span class="l-tr">${gl(a.tr)}</span></button>`;
   }
 
   /* ---------- quiz ---------- */
@@ -718,14 +729,14 @@
       <button class="icon-btn lm-close" type="button" data-close aria-label="Close">${icon('x')}</button>
       <div class="lm-head"><div class="pattern"></div><div class="lm-big" lang="${HL}">${esc(a.ch)}</div>
         <div><div class="eyebrow">${i + 1} / ${A.length} · ${esc((D.groups.find(g => g.id === a.group) || {}).label || '')}</div><h2>${esc(a.name)}</h2>
-        <div class="muted">${esc(a.tr)}${a.alt ? ` · also written ${tg(a.alt, 'tg-in')}` : ''}</div>
+        <div class="muted">${gl(a.tr)}${a.alt ? ` · also written ${tg(a.alt, 'tg-in')}` : ''}</div>
         <div style="margin-top:12px;display:flex;gap:8px"><button class="btn btn-primary btn-sm" type="button" data-say="${esc(a.say)}">${icon('play')} ${u('listen')}</button></div></div>
       </div>
       <div class="lm-body">
         <dl class="kv">
           <dt>${u('sound')}</dt><dd>${md(a.sound)}</dd>
           ${a.tip ? `<dt>${u('trick')}</dt><dd>${md(a.tip)}</dd>` : ''}
-          <dt>${u('example')}</dt><dd><span class="tg-in" lang="${HL}" style="font-size:1.6em;cursor:pointer" data-say="${esc(a.example.t)}">${esc(a.example.t)}</span> ${a.example.tr ? `(${esc(a.example.tr)})` : ''} = ${md(a.example.mean)}</dd>
+          <dt>${u('example')}</dt><dd><span class="tg-in" lang="${HL}" style="font-size:1.6em;cursor:pointer" data-say="${esc(a.example.t)}">${esc(a.example.t)}</span> ${a.example.tr ? `(${gl(a.example.tr)})` : ''} = ${md(a.example.mean)}</dd>
         </dl>
         ${exHan ? hanziPad([...a.example.t].filter(isHan), 'lmhz') : writeItems ? traceHTML(writeItems, 'lm') : ''}
         <div class="lm-nav"><button class="btn" type="button" data-letter="${esc(prev.id)}">${icon('arrowL')} ${esc(prev.name)}</button><button class="btn" type="button" data-letter="${esc(next.id)}">${esc(next.name)} ${icon('arrowR')}</button></div>
@@ -772,7 +783,7 @@
     if (!w) return `<div class="result-card"><div class="big">${icon('check', 'style="width:56px;height:56px"')}</div><b>${u('noDue')}</b><p class="muted">Come back tomorrow, or pick another deck.</p></div>`;
     const front = S.fcDir === 'tg' ? `<div class="tg" lang="${HL}">${esc(w.t)}</div>` : `<div class="fc-mean">${md(w.mean)}</div>`;
     const back = `<div class="tg" lang="${HL}" style="font-size:calc(2.6rem * var(--tg-scale))">${esc(w.t)}</div>
-      <div style="color:var(--primary);font-weight:600">${esc(w.tr)}</div><div class="fc-mean">${md(w.mean)}</div>
+      <div style="color:var(--primary);font-weight:600">${gl(w.tr)}</div><div class="fc-mean">${md(w.mean)}</div>
       ${w.root ? `<span class="root">${esc(w.root)}</span>` : ''}
       ${w.example ? `<div class="muted" style="font-size:.9rem">${tg(w.example.t, 'tg-in')} — ${md(w.example.mean)}</div>` : ''}`;
     return `<div class="muted" style="text-align:center;font-size:.85rem;margin-bottom:8px">${fcQueue.length} cards left today</div>
@@ -849,7 +860,7 @@
       const differs = x => x !== a && x.name !== a.name && x.tr !== a.tr && x.ch !== a.ch;
       const same = shuffle(A.filter(x => x.group === a.group && differs(x))), rest = shuffle(A.filter(x => x.group !== a.group && differs(x)));
       opts = shuffle([a].concat(same.slice(0, 2), rest).slice(0, 4)).map(x => x.ch); answer = a.ch;
-      prompt = `<div class="muted">Find this ${C.hanzi ? 'sound' : 'letter'}</div><div class="big">${esc(a.name)}</div><div class="muted">${esc(a.tr)}</div>`;
+      prompt = `<div class="muted">Find this ${C.hanzi ? 'sound' : 'letter'}</div><div class="big">${esc(a.name)}</div><div class="muted">${gl(a.tr)}</div>`;
     }
     G.answer = answer;
     $('#arena').innerHTML = `${arenaTop()}<div class="prompt">${prompt}</div><div class="answers ${words ? 'answers-words' : ''}">${opts.map(o => `<button type="button" data-gans="${esc(o)}" lang="${HL}">${esc(o)}</button>`).join('')}</div>`;
@@ -935,7 +946,7 @@
       ${!ls.length && !ws.length && !as.length ? `<div class="empty">${u('nothing')}</div>` : ''}
       ${as.length ? `<div class="letter-grid" style="margin-bottom:18px">${as.map(letterTile).join('')}</div>` : ''}
       ${ls.length ? `<div class="results" style="margin-bottom:18px">${ls.map(l => `<a class="result" href="#lesson/${l.id}" data-c="${l.unit.color}">${badge(l.unit, 'style="width:40px;height:40px;font-size:16px"', l.icon)}<div><b>${md(l.title)}</b><div class="muted" style="font-size:.85rem">${md(l.unit.title)}</div></div></a>`).join('')}</div>` : ''}
-      ${ws.length ? `<div class="results">${ws.map(w => `<a class="result" href="#lesson/${w.lesson.id}">${tg(w.t)}<div><b>${md(w.mean)}</b><div class="muted" style="font-size:.85rem">${esc(w.tr)} — ${md(w.lesson.title)}</div></div></a>`).join('')}</div>` : ''}`;
+      ${ws.length ? `<div class="results">${ws.map(w => `<a class="result" href="#lesson/${w.lesson.id}">${tg(w.t)}<div><b>${md(w.mean)}</b><div class="muted" style="font-size:.85rem">${gl(w.tr)} — ${md(w.lesson.title)}</div></div></a>`).join('')}</div>` : ''}`;
   }
 
   /* ---------- settings, tools, roots, certificate ---------- */
@@ -950,6 +961,7 @@
       <div class="set-row"><div><b>Voice</b><small>${HAVE.size ? 'Built-in recorded voices, nothing to install.' : voice ? esc(voice.name) : `No ${esc(LANG)} voice in this browser`} <a href="#sound">Sound setup</a></small></div>${HAVE.size ? voiceSeg() : '<a class="btn" href="#sound">Open sound setup</a>'}</div>
       <div class="set-row"><div><b>Speech speed</b><small>Slower is easier for beginners</small></div>
         <span style="display:flex;gap:8px;align-items:center"><input id="rate" type="range" min="0.4" max="1.1" step="0.05" value="${S.rate}">${playBtn(C.greeting || '')}</span></div>
+      <div class="set-row"><div><b>Meanings</b><small>Show the English, the Bangla, or both</small></div><div class="seg" role="group">${[['both', 'Both'], ['en', 'English'], ['bn', 'বাংলা']].map(([k, l]) => `<button type="button" data-gloss-set="${k}" aria-pressed="${(S.gloss || 'both') === k}">${l}</button>`).join('')}</div></div>
       <div class="set-row"><div><b>Theme</b></div><div class="seg" role="group">${[['auto', 'System'], ['light', 'Light'], ['dark', 'Dark']].map(([k, l]) => `<button type="button" data-theme-set="${k}" aria-pressed="${S.theme === k}">${l}</button>`).join('')}</div></div>
       <div class="set-row"><div><b>${u('book')}</b><small>Read online, or download the PDF to print</small></div><span style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" href="book.html" target="_blank" rel="noopener">Open the book</a><a class="btn btn-primary" href="${esc(C.pdf || 'book.pdf')}" download>Download PDF</a></span></div>
       <div class="set-row"><div><b>Reset progress</b><small>Clears XP, lessons, quiz scores and flashcards on this device</small></div>
@@ -979,7 +991,7 @@
     const list = (all || rootMap()).filter(([r, ws]) => !q || fold(r).includes(q) || ws.some(w => fold(w.t + ' ' + w.mean + ' ' + w.tr).includes(q)));
     if (!list.length) return `<div class="empty">${u('nothing')}</div>`;
     return list.map(([r, ws]) => `<details class="root-card"><summary><span class="root-letters" lang="${HL}">${esc(r)}</span><span class="chip">${ws.length} word${ws.length > 1 ? 's' : ''}</span><span class="root-hint">${md(ws[0].mean)}</span></summary>
-      <div class="root-list">${ws.map(w => `<div class="root-row">${tg(w.t)}<span><b>${md(w.mean)}</b><small class="muted"> · ${esc(w.tr)}</small></span>${playBtn(w.t)}</div>`).join('')}</div></details>`).join('');
+      <div class="root-list">${ws.map(w => `<div class="root-row">${tg(w.t)}<span><b>${md(w.mean)}</b><small class="muted"> · ${gl(w.tr)}</small></span>${playBtn(w.t)}</div>`).join('')}</div></details>`).join('');
   }
   function viewCertificate() {
     const doneN = Object.keys(S.done).length;
@@ -1067,6 +1079,7 @@
     const t = e.target;
     if (t.closest('#themeBtn')) { S.theme = isDark() ? 'light' : 'dark'; save(); applyTheme(); renderChrome(); return; }
     const vs = t.closest('[data-voice-set]'); if (vs) { S.voice = vs.dataset.voiceSet; save(); rerender(); say(C.greeting); return; }
+    const gs = t.closest('[data-gloss-set]'); if (gs) { S.gloss = gs.dataset.glossSet; save(); applyTheme(); rerender(); return; }
     const ts = t.closest('[data-theme-set]'); if (ts) { S.theme = ts.dataset.themeSet; save(); applyTheme(); rerender(); return; }
     if (t.closest('[data-close]')) { closeModal(); return; }
     if (t.closest('[data-sbclose]')) { const sb = $('#soundBanner'); if (sb) sb.remove(); return; }
@@ -1121,7 +1134,7 @@
     const rp = t.closest('[data-replay]'); if (rp) { view.innerHTML = viewPlay(rp.dataset.replay); return; }
     const rs = t.closest('[data-reset]'); if (rs) {
       if (rs.dataset.reset === 'ask') $('#resetSlot').innerHTML = `<span style="display:flex;gap:6px"><button class="btn btn-sm" type="button" data-reset="no">Cancel</button><button class="btn btn-sm" type="button" data-reset="yes" style="background:var(--bad);color:#fff;border-color:transparent">Yes, erase everything</button></span>`;
-      else if (rs.dataset.reset === 'yes') { S = Object.assign(defaults(), { theme: S.theme, tgScale: S.tgScale, rate: S.rate, voice: S.voice }); save(); rerender(); toast('Progress reset.'); }
+      else if (rs.dataset.reset === 'yes') { S = Object.assign(defaults(), { theme: S.theme, gloss: S.gloss, tgScale: S.tgScale, rate: S.rate, voice: S.voice }); save(); rerender(); toast('Progress reset.'); }
       else rerender();
       return;
     }
