@@ -33,11 +33,14 @@ window.LC = window.LC || { course: null, alphabet: null, units: [] };
   function twoSided(s) {
     if (!GLOSSABLE) return null;
     s = String(s == null ? '' : s);
-    let i = s.indexOf(' · ');
+    /* Scanned from the right: a title like "A · absolu → affectueux · বাংলা"
+       must split at the LAST dot, not the first, or the French would be
+       swept into the Bangla side. */
+    let i = s.lastIndexOf(' · ');
     while (i >= 0) {
       const a = s.slice(0, i), b = s.slice(i + 3);
       if (!BNRE.test(a) && BNRE.test(b)) return [a, b];
-      i = s.indexOf(' · ', i + 1);
+      i = s.lastIndexOf(' · ', i - 1);
     }
     return null;
   }
@@ -50,6 +53,9 @@ window.LC = window.LC || { course: null, alphabet: null, units: [] };
   }
   const md = s => gloss(s, mdRaw);   /* meanings, notes, explanations */
   const gl = s => gloss(s, esc);     /* pronunciation lines and other plain strings */
+  /* A practice line is either plain target text, or that text with a gloss:
+     "bonjour"  or  { t: "bonjour", mean: "hello · নমস্কার" }. */
+  const lineOf = l => (l && typeof l === 'object') ? l : { t: l, mean: '' };
   const plain = s => String(s == null ? '' : s).replace(/\{\{|\}\}|\*\*/g, '');
   function hl(t, h, cls) {
     if (!h || String(t).indexOf(h) < 0) return esc(t);
@@ -78,5 +84,5 @@ window.LC = window.LC || { course: null, alphabet: null, units: [] };
   const joiner = C.cjk ? '' : ' ';
   const isHan = ch => /^[㐀-鿿豈-﫿]$/.test(ch);
 
-  window.LX = { C, esc, md, gl, plain, hl, fold, isTarget, prepare, seeded, joiner, isHan };
+  window.LX = { C, esc, md, gl, lineOf, plain, hl, fold, isTarget, prepare, seeded, joiner, isHan };
 })();

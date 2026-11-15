@@ -351,6 +351,7 @@ td .sub, th .sub { font-size: .85em; }
 [data-motif="fr"] .badge, [data-motif="zh"] .badge { box-shadow: inset 0 0 0 1.2mm var(--uc), inset 0 0 0 1.6mm rgba(255, 255, 255, .85); }
 [data-motif="bn"] .cover-art .ac { color: #f42a41; }
 [data-motif="fr"] .cover-art .ac { color: #ef4135; } [data-motif="fr"] .cover-art .ac2 { color: #8fb0ff; }
+.ln-gloss { font-size: 8.5pt; color: #4b635d; margin: -0.6mm 0 1.2mm; }
 
 /* course theme: Learn French */
 :root { --primary: #2648a8; --ink: #141c33; --ink-2: #4b5470; --ink-3: #7d859e; --line: #d6dbe8; --tint: #e8ebf4; --cover: #15244f; --f-tg: "Fraunces", Georgia, serif; --f-en: "Figtree", "Segoe UI", system-ui, sans-serif; --tg-k: .86; --tg-lh: 1.3;

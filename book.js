@@ -2,7 +2,7 @@
    Copyright © ZyeemZia */
 (function () {
   'use strict';
-  const { C, esc, md, gl, plain, hl, fold, prepare, seeded, isHan } = window.LX;
+  const { C, esc, md, gl, lineOf, plain, hl, fold, prepare, seeded, isHan } = window.LX;
   const MOTIF = String(C.htmlLang || 'fr').split('-')[0];
   const ART = (window.LXART || {})[MOTIF] || { scene: '', icon: '', corner: '' };
   document.documentElement.setAttribute('data-motif', MOTIF);
@@ -110,7 +110,7 @@
       case 'rule': return wrap(`<section class="rule" style="--rc:var(--tj-${esc(b.color)})"><div class="rule-h"><h4>${md(b.name)}</h4></div>
         <p>${md(b.desc)}</p>${b.how ? `<div class="how"><b>How to say it:</b> ${md(b.how)}</div>` : ''}
         ${b.examples && b.examples.length ? `<div class="exs">${b.examples.map(x => `<span lang="${HL}">${hl(x.t, x.hl, 'tj-' + b.color)}<small>${gl(x.tr)}</small></span>`).join('')}</div>` : ''}</section>`);
-      case 'practice': return wrap(`<div class="practice"><p style="font-size:9.5pt;margin-bottom:1mm">${md(b.text)}</p>${b.lines.map(l => `<div class="ln" lang="${HL}">${esc(l)}</div>`).join('')}</div>`);
+      case 'practice': return wrap(`<div class="practice"><p style="font-size:9.5pt;margin-bottom:1mm">${md(b.text)}</p>${b.lines.map(l => { const L = lineOf(l); return `<div class="ln" lang="${HL}">${esc(L.t)}</div>${L.mean ? `<div class="ln-gloss">${md(L.mean)}</div>` : ''}`; }).join('')}</div>`);
       case 'vocab': return wrap(`<table class="vt"><thead><tr><th>${esc(L1)}</th><th>Say it</th><th>Meaning</th></tr></thead><tbody>${b.items.map(w => `<tr><td class="tgc" lang="${HL}">${esc(w.t)}</td><td>${gl(w.tr)}</td><td>${md(w.mean)}${w.root ? ` <span class="root" lang="${HL}">${esc(w.root)}</span>` : ''}${w.example ? `<div class="exr">${tg(w.example.t, 'tg-in')}${w.example.tr ? ` (${gl(w.example.tr)})` : ''} — ${md(w.example.mean)}</div>` : ''}</td></tr>`).join('')}</tbody></table>`);
       case 'sentence': return wrap(`<div class="sent"><div class="txt" lang="${HL}">${esc(b.t)}</div>
           ${b.words && b.words.length ? `<div class="wbw">${b.words.map(w => `<div>${tg(w.t)}<small>${md(w.mean)}</small></div>`).join('')}</div>` : ''}

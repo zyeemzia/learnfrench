@@ -2,7 +2,7 @@
    Copyright © ZyeemZia */
 (function () {
   'use strict';
-  const { C, esc, md, gl, plain, hl, fold, prepare, joiner, isHan } = window.LX;
+  const { C, esc, md, gl, lineOf, plain, hl, fold, prepare, joiner, isHan } = window.LX;
   const MOTIF = String(C.htmlLang || 'fr').split('-')[0];
   const ART = (window.LXART || {})[MOTIF] || { scene: '', icon: '', corner: '' };
   document.documentElement.setAttribute('data-motif', MOTIF);
@@ -444,7 +444,7 @@
         </div></section>`;
       case 'practice': return `<section class="practice">${T}
         <div class="practice-top"><div>${md(b.text)}</div></div>
-        ${b.lines.map(line => `<div class="p-line" lang="${HL}">${(C.cjk ? [line] : line.split(/\s+/).filter(Boolean).reduce((o, w) => { if (o.length && !/\p{L}|\d/u.test(w)) o[o.length - 1] += ' ' + w; else o.push(w); return o; }, [])).map(w => `<button class="p-word" type="button" data-say="${esc(w)}">${esc(w)}</button>`).join('')}${playBtn(line, u('playLine'))}</div>`).join('')}
+        ${b.lines.map(L => { const line = lineOf(L).t, gloss = lineOf(L).mean; return `<div class="p-line" lang="${HL}">${(C.cjk ? [line] : line.split(/\s+/).filter(Boolean).reduce((o, w) => { if (o.length && !/\p{L}|\d/u.test(w)) o[o.length - 1] += ' ' + w; else o.push(w); return o; }, [])).map(w => `<button class="p-word" type="button" data-say="${esc(w)}">${esc(w)}</button>`).join('')}${playBtn(line, u('playLine'))}</div>${gloss ? `<div class="p-gloss">${md(gloss)}</div>` : ''}`; }).join('')}
       </section>`;
       case 'vocab': return `<div>${T}<div class="vocab">${b.items.map(w => `
         <div class="vrow">

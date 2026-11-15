@@ -922,6 +922,7 @@ html[data-gloss="bn"] .gl-sep { display: none; }
 .glbar button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 @media print { .glbar { display: none; } }
 .lesson-gloss { margin: 6px 0 10px; }
+.p-gloss { margin: -2px 0 10px; font-size: .9rem; color: var(--ink-2); }
 
 /* ---------- course theme: Learn French ---------- */
 :root { --paper: #f4f5f9; --surface-2: #e8ebf4; --ink: #141c33; --ink-2: #4b5470; --ink-3: #7d859e; --line: #d6dbe8; --primary: #2648a8; --primary-print: #2648a8; --c-teal: #2648a8; --cover: #15244f;
