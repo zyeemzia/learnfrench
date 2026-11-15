@@ -84,5 +84,27 @@ window.LC = window.LC || { course: null, alphabet: null, units: [] };
   const joiner = C.cjk ? '' : ' ';
   const isHan = ch => /^[㐀-鿿豈-﫿]$/.test(ch);
 
-  window.LX = { C, esc, md, gl, lineOf, plain, hl, fold, isTarget, prepare, seeded, joiner, isHan };
+  /* Whether the English/Bangla switch is worth putting on screen.  Two
+     things must both hold: the split has to be allowed here at all, and
+     the course data has to actually carry a Bangla side somewhere.  The
+     English-speaker courses satisfy neither, and a switch that changes
+     nothing is worse than no switch.  Walked once, lazily, and stopped
+     at the first glossed string it finds. */
+  function anyGlossed(o, seen) {
+    if (typeof o === 'string') return twoSided(o) !== null;
+    if (!o || typeof o !== 'object') return false;
+    /* app.js later hangs back-pointers off these objects, so an unguarded
+       walk would follow a lesson to its unit and back for ever. */
+    if (seen.has(o)) return false;
+    seen.add(o);
+    if (Array.isArray(o)) return o.some(v => anyGlossed(v, seen));
+    return Object.keys(o).some(k => anyGlossed(o[k], seen));
+  }
+  /* Settled once, here, while the units are still exactly as the bundle
+     wrote them: core.js runs after data.bundle.js and before app.js. */
+  const GLOSS_UI = GLOSSABLE && !!(window.LC && Array.isArray(LC.units)
+    && anyGlossed(LC.units, new WeakSet()));
+  function hasGloss() { return GLOSS_UI; }
+
+  window.LX = { C, esc, md, gl, lineOf, plain, hl, fold, isTarget, prepare, seeded, joiner, isHan, hasGloss };
 })();

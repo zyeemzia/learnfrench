@@ -2,7 +2,7 @@
    Copyright © ZyeemZia */
 (function () {
   'use strict';
-  const { C, esc, md, gl, lineOf, plain, hl, fold, prepare, joiner, isHan } = window.LX;
+  const { C, esc, md, gl, lineOf, plain, hl, fold, prepare, joiner, isHan, hasGloss } = window.LX;
   const MOTIF = String(C.htmlLang || 'fr').split('-')[0];
   const ART = (window.LXART || {})[MOTIF] || { scene: '', icon: '', corner: '' };
   document.documentElement.setAttribute('data-motif', MOTIF);
@@ -399,7 +399,7 @@
       <div class="crumbs"><a href="#learn">${u('learn')}</a> / <a href="#unit/${un.id}">${md(un.title)}</a> / <span>${u('lesson')} ${l.index + 1}</span></div>
       <header class="lesson-head"><div class="pattern"></div><div class="head-corner">${ART.corner}</div>${badge(un, '', l.icon)}
         <div><div class="u-num">${u('unit')} ${un.order} · ${u('lesson')} ${l.index + 1}/${un.lessons.length} · ${l.minutes} ${u('min')}</div>
-        <div class="lesson-gloss">${glossBar()}</div>
+        ${hasGloss() ? `<div class="lesson-gloss">${glossBar()}</div>` : ''}
         <h1>${md(l.title)}</h1><p>${md(l.subtitle)}</p>
         ${l.goals && l.goals.length ? `<ul class="goals" aria-label="${u('goals')}">${l.goals.map(g => `<li><span>${md(g)}</span></li>`).join('')}</ul>` : ''}</div>
       </header>
@@ -961,7 +961,7 @@
       <div class="set-row"><div><b>Voice</b><small>${HAVE.size ? 'Built-in recorded voices, nothing to install.' : voice ? esc(voice.name) : `No ${esc(LANG)} voice in this browser`} <a href="#sound">Sound setup</a></small></div>${HAVE.size ? voiceSeg() : '<a class="btn" href="#sound">Open sound setup</a>'}</div>
       <div class="set-row"><div><b>Speech speed</b><small>Slower is easier for beginners</small></div>
         <span style="display:flex;gap:8px;align-items:center"><input id="rate" type="range" min="0.4" max="1.1" step="0.05" value="${S.rate}">${playBtn(C.greeting || '')}</span></div>
-      <div class="set-row"><div><b>Meanings</b><small>Show the English, the Bangla, or both</small></div><div class="seg" role="group">${[['both', 'Both'], ['en', 'English'], ['bn', 'বাংলা']].map(([k, l]) => `<button type="button" data-gloss-set="${k}" aria-pressed="${(S.gloss || 'both') === k}">${l}</button>`).join('')}</div></div>
+      ${hasGloss() ? `<div class="set-row"><div><b>Meanings</b><small>Show the English, the Bangla, or both</small></div><div class="seg" role="group">${[['both', 'Both'], ['en', 'English'], ['bn', 'বাংলা']].map(([k, l]) => `<button type="button" data-gloss-set="${k}" aria-pressed="${(S.gloss || 'both') === k}">${l}</button>`).join('')}</div></div>` : ''}
       <div class="set-row"><div><b>Theme</b></div><div class="seg" role="group">${[['auto', 'System'], ['light', 'Light'], ['dark', 'Dark']].map(([k, l]) => `<button type="button" data-theme-set="${k}" aria-pressed="${S.theme === k}">${l}</button>`).join('')}</div></div>
       <div class="set-row"><div><b>${u('book')}</b><small>Read online, or download the PDF to print</small></div><span style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" href="book.html" target="_blank" rel="noopener">Open the book</a><a class="btn btn-primary" href="${esc(C.pdf || 'book.pdf')}" download>Download PDF</a></span></div>
       <div class="set-row"><div><b>Reset progress</b><small>Clears XP, lessons, quiz scores and flashcards on this device</small></div>
