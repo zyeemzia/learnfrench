@@ -750,7 +750,7 @@ input[type="range"] { accent-color: var(--primary); width: 180px; max-width: 100
 .bb-cover small { font: 600 .68rem var(--f-display); color: #cfe5df; letter-spacing: .04em; }
 .bb-text { display: grid; gap: 8px; min-width: 0; }
 .bb-text h2 { font-size: 1.3rem; }
-.foot-links { display: inline-flex; gap: 14px; }
+.foot-links { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; max-width: 100%; }
 .foot-links a { color: var(--ink-2); font-weight: 600; text-decoration: none; }
 .foot-links a:hover { color: var(--primary); }
 
