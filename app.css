@@ -884,6 +884,7 @@ input[type="range"] { accent-color: var(--primary); width: 180px; max-width: 100
 .bb-art { position: absolute; left: 0; right: 0; bottom: 6px; color: #f2c76b; opacity: .55; }
 .bb-art .ac { color: #ffffff; }
 .foot-art { max-width: 760px; margin: 18px auto 0; padding: 0 16px; color: var(--line); }
+.foot-art .art { overflow: hidden; }
 .foot-art .art .ac, .foot-art .art .ac2 { color: var(--ink-3); }
 .boot-art { width: 120px; color: var(--primary); opacity: .8; }
 /* motif details: Paris enamel plaques and Chinese seals get a white inner rim */

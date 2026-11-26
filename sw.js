@@ -1,7 +1,7 @@
 /* Offline cache for Learn French. Copyright © ZyeemZia
    Pages and files open instantly from the cache and are refreshed in the background.
    VERSION is stamped by the build; a new version clears the old cache. */
-const VERSION = 'd9d5f8c4b9';
+const VERSION = '330e27e6b8';
 const CACHE = 'learnfrench-' + VERSION;
 const CORE = ['./', 'index.html', 'app.css', 'fonts.css', 'data.bundle.js', 'core.js', 'art.js', 'app.js', 'favicon.svg', 'book.html', 'book.css', 'book.js'];
 
