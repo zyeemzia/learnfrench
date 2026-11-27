@@ -1,6 +1,8 @@
 /* ZyeemZia language courses. Layout concept: a calm study desk — tinted paper, one strong course colour,
    gold accents and a faint star lattice; the target language always gets the most room on the page.
    Copyright © ZyeemZia */
+/* Form controls use the page font; browsers otherwise fall back to Arial. */
+button, input, select, textarea { font-family: inherit; }
 :root {
   --paper: #f3f6f4;
   --surface: #ffffff;
